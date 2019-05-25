@@ -1,0 +1,10 @@
+{
+	"extDesc": {
+		"message": "Shows Facebook email notifications completely in Gmail™.",
+		"description": "Extension description."
+	},
+	"extName": {
+		"message": "Expand Facebook Notification Mails For Gmail™",
+		"description": "Extension name."
+	}
+}

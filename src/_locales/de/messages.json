@@ -1,0 +1,10 @@
+{
+	"extDesc": {
+		"message": "Zeigt die Facebook Benachrichtungen komplett in Gmail™ an.",
+		"description": "Extension description."
+	},
+	"extName": {
+		"message": "Facebook Benachrichtungen komplett anzeigen für Gmail™",
+		"description": "Extension name."
+	}
+}
