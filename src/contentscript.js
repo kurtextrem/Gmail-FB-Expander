@@ -17,6 +17,11 @@ function fetchFromBackground(path) {
 	})
 }
 
+function error(e) {
+	console.error(e)
+	return e
+}
+
 function fetchFromElement(element) {
 	if (element === null) return
 
@@ -30,7 +35,7 @@ function fetchFromElement(element) {
 
 	const maybePromise = fetchMap.get(path)
 	if (maybePromise !== undefined) {
-		maybePromise.then(update.bind(undefined, parent))
+		maybePromise.then(update.bind(undefined, parent)).catch(error)
 		fetchMap.delete(path)
 		return
 	}
@@ -40,6 +45,7 @@ function fetchFromElement(element) {
 		const promise = fetchFromBackground(path)
 			.then(update.bind(undefined, parent))
 			.then(cache.bind(undefined, path))
+			.catch(error)
 		fetchMap.set(path, promise)
 	}
 }
