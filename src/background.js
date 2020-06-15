@@ -1,8 +1,8 @@
 'use strict'
 
 const options = {
-	credentials: 'include',
 	cache: 'force-cache',
+	credentials: 'include',
 	headers: new Headers({
 		Connection: 'keep-alive',
 	}),
@@ -27,20 +27,20 @@ function parse(text) {
 	const dom = new DOMParser().parseFromString(text.replace(commentOpen, '').replace(commentClose, ''), 'text/html')
 	const element = dom.querySelector('div[data-testid="post_message"]')
 
-	let text = ''
+	let textToReturn = ''
 	if (element === null || !element.textContent) {
 		const match = text.match('"story":{"message":{"text":"([^"]+)"')
 		if (match.length === 0) {
 			console.warn('no match', element)
 			return ''
 		}
-		text = match[1]
+		textToReturn = match[1]
 	} else {
-		text = element.innerHTML
+		textToReturn = element.innerHTML
 	}
 
 	regexUsed = true
-	return text
+	return textToReturn
 }
 
 /**
