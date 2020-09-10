@@ -2,10 +2,12 @@
 
 const label = /#label(?:\/.+){2}/,
 	inbox = /#(inbox|imp|al{2})\/.+/,
-	urlRegex = /^https:\/\/www.facebook.com\//,
 	cacheMap = new Map(),
 	fetchMap = new Map()
 
+	/**
+	 *
+	 */
 function fetchFromBackground(path) {
 	return new Promise((resolve, reject) => {
 		chrome.runtime.sendMessage({ path }, html => {
@@ -17,11 +19,17 @@ function fetchFromBackground(path) {
 	})
 }
 
+/**
+ *
+ */
 function error(e) {
 	console.error(e)
 	return e
 }
 
+/**
+ *
+ */
 function fetchFromElement(element) {
 	if (element === null) return
 
@@ -29,7 +37,7 @@ function fetchFromElement(element) {
 			'td > span > a[href^="https://www.facebook.com/nd/"]'
 		),
 		href = query[query.length - 1],
-		path = href.href.replace(urlRegex, '')
+		path = href.href.replace(/^https:\/\/www.facebook.com\//, '')
 
 	const parent = href.parentElement
 
@@ -50,6 +58,9 @@ function fetchFromElement(element) {
 	}
 }
 
+/**
+ *
+ */
 function update(element, text) {
 	const hash = document.location.hash
 	if (
@@ -66,6 +77,9 @@ function update(element, text) {
 	return text
 }
 
+/**
+ *
+ */
 function recursiveCleanStyle(node) {
 	const children = node.children
 	for (let i = 0; i < children.length; ++i) {
@@ -74,12 +88,18 @@ function recursiveCleanStyle(node) {
 	}
 }
 
+/**
+ *
+ */
 function cache(key, html) {
 	cacheMap.set(key, html)
 	return html
 }
 
 let observer
+/**
+ *
+ */
 function observe() {
 	let div = document.querySelector('div[id=":4"] + div')
 	if (div === null) {
@@ -92,11 +112,14 @@ function observe() {
 
 	observer = new MutationObserver(handleMutations)
 	observer.observe(div, {
-		subtree: true,
 		childList: true,
+		subtree: true,
 	})
 }
 
+/**
+ *
+ */
 function handleMutations(mutations) {
 	const hash = document.location.hash
 	if (!label.test(hash) && !inbox.test(hash)) return
@@ -122,7 +145,7 @@ function handleMutations(mutations) {
  * @date   	2015-06-07
  */
 function addListener() {
-	window.addEventListener('load', function() {
+	window.addEventListener('load', function () {
 		if (observer !== undefined) observer.disconnect()
 		observe()
 		window.setInterval(() => {

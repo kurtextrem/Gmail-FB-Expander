@@ -29,7 +29,7 @@ function parse(text) {
 
 	let textToReturn = ''
 	if (element === null || !element.textContent) {
-		const match = text.match('"story":{"message":{"text":"([^"]+)"')
+		const match = text.match(/"story":{"message":{"text":"([^"]+)"/)
 		if (match.length === 0) {
 			console.warn('no match', element)
 			return ''
