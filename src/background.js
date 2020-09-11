@@ -1,22 +1,21 @@
 'use strict'
 
-const options = {
-	cache: 'force-cache',
-	credentials: 'include',
-	headers: new Headers({
-		Connection: 'keep-alive',
-	}),
-}
-
 /**
  *
  */
 function fetchCache(url) {
-	return fetch(url, options).then(checkStatus).then(toText)
+	return fetch(url, {
+		cache: 'force-cache',
+		credentials: 'include',
+		headers: {
+			Connection: 'keep-alive',
+			Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+			'Cache-Control': 'max-age=0',
+			'viewport-width': 1920
+		},
+		mode: 'cors'
+	}).then(checkStatus).then(toText)
 }
-
-const commentOpen = /<!--/g,
-	commentClose = /-->/g
 
 let regexUsed = false
 
@@ -24,17 +23,21 @@ let regexUsed = false
  *
  */
 function parse(text) {
-	const dom = new DOMParser().parseFromString(text.replace(commentOpen, '').replace(commentClose, ''), 'text/html')
+	const dom = new DOMParser().parseFromString(text.replace(/<!--/g, '').replace(/-->/g, ''), 'text/html')
 	const element = dom.querySelector('div[data-testid="post_message"]')
 
 	let textToReturn = ''
 	if (element === null || !element.textContent) {
-		const match = text.match(/"story":{"message":{"text":"([^"]+)"/)
+		const match = text.match(/"story":{"message":{"text":"(.+?)"}?,"/) // ? grabs as little as possible.
 		if (!match || match.length === 0) {
 			console.warn('no match', element)
 			return ''
 		}
-		textToReturn = match[1]
+		try { textToReturn = (JSON.parse('{"text":"' + match[1].replace(/\\n/g, '<br>') + '"}')).text } // 
+		catch (e) {
+			console.error(e)
+			textToReturn = match[1]
+		}
 	} else {
 		textToReturn = element.innerHTML
 	}
@@ -72,7 +75,8 @@ function error(e) {
 }
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-	fetchCache('https://www.facebook.com/' + request.path)
+	const realPath = decodeURIComponent(request.path).replace('nd/?', '').split('&')[0]
+	fetchCache('https://www.facebook.com/' + realPath)
 		.then(parse)
 		.then(sendResponse)
 		.catch(error)

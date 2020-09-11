@@ -34,7 +34,7 @@ function fetchFromElement(element) {
 	if (element === null) return
 
 	const query = element.querySelectorAll(
-			'td > span > a[href^="https://www.facebook.com/nd/"]'
+			'td > span > a[href^="https://www.facebook.com/nd/?groups"]'
 		),
 		href = query[query.length - 1],
 		path = href.href.replace(/^https:\/\/www.facebook.com\//, '')
