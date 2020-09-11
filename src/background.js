@@ -30,7 +30,7 @@ function parse(text) {
 	let textToReturn = ''
 	if (element === null || !element.textContent) {
 		const match = text.match(/"story":{"message":{"text":"([^"]+)"/)
-		if (match.length === 0) {
+		if (!match || match.length === 0) {
 			console.warn('no match', element)
 			return ''
 		}
@@ -72,8 +72,7 @@ function error(e) {
 }
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-	const realPath = decodeURIComponent(request.path).replace('nd/?', '').split('&')[0]
-	fetchCache('https://www.facebook.com/' + realPath)
+	fetchCache('https://www.facebook.com/' + request.path)
 		.then(parse)
 		.then(sendResponse)
 		.catch(error)
