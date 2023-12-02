@@ -17,35 +17,6 @@ function fetchCache(url) {
 	}).then(checkStatus).then(toText)
 }
 
-let regexUsed = false
-
-/**
- *
- */
-function parse(text) {
-	const dom = new DOMParser().parseFromString(text.replace(/<!--/g, '').replace(/-->/g, ''), 'text/html')
-	const element = dom.querySelector('div[data-testid="post_message"]')
-
-	let textToReturn = ''
-	if (element === null || !element.textContent) {
-		const match = text.match(/"story":{"message":{"text":"(.+?)"}?,"/) // ? grabs as little as possible.
-		if (!match || match.length === 0) {
-			console.warn('no match', element)
-			return ''
-		}
-		try { textToReturn = (JSON.parse('{"text":"' + match[1].replace(/\\n/g, '<br>') + '"}')).text } // 
-		catch (e) {
-			console.error(e)
-			textToReturn = match[1]
-		}
-	} else {
-		textToReturn = element.innerHTML
-	}
-
-	regexUsed = true
-	return textToReturn
-}
-
 /**
  *
  */
@@ -77,28 +48,8 @@ function error(e) {
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 	const realPath = decodeURIComponent(request.path).replace('nd/?', '').split('&')[0]
 	fetchCache('https://www.facebook.com/' + realPath)
-		.then(parse)
 		.then(sendResponse)
 		.catch(error)
 
 	return true
 })
-
-/**
- *
- */
-function free() {
-	if (!regexUsed) return
-
-	regexUsed = false
-	;/\s*/g.exec('')
-}
-
-setInterval(() => {
-	free()
-}, 600000)
-
-const preconnect = document.createElement('link')
-preconnect.rel = 'preconnect'
-preconnect.href = 'https://www.facebook.com/'
-document.head.appendChild(preconnect)

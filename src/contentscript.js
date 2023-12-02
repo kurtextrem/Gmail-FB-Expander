@@ -27,6 +27,52 @@ function error(e) {
 	return e
 }
 
+
+let regexUsed = false
+
+/**
+ *
+ */
+function parse(text) {
+	const dom = new DOMParser().parseFromString(text.replace(/<!--/g, '').replace(/-->/g, ''), 'text/html')
+	const element = dom.querySelector('div[data-testid="post_message"]')
+
+	let textToReturn = ''
+	if (element === null || !element.textContent) {
+		const match = text.match(/"story":{"message":{"text":"(.+?)"}?,"/) // ? grabs as little as possible.
+		if (!match || match.length === 0) {
+			console.warn('no match', element)
+			return ''
+		}
+		try { textToReturn = (JSON.parse('{"text":"' + match[1].replace(/\\n/g, '<br>') + '"}')).text } // 
+		catch (e) {
+			console.error(e)
+			textToReturn = match[1]
+		}
+	} else {
+		textToReturn = element.innerHTML
+	}
+
+	regexUsed = true
+	return textToReturn
+}
+
+/**
+ *
+ */
+function free() {
+	if (!regexUsed) return
+
+	regexUsed = false
+	;/\s*/g.exec('')
+}
+
+setInterval(() => {
+	free()
+}, 600000)
+
+
+
 /**
  *
  */
@@ -51,6 +97,7 @@ function fetchFromElement(element) {
 	if (cacheMap.has(path)) update(parent, cacheMap.get(path))
 	else {
 		const promise = fetchFromBackground(path)
+			.then(parse)
 			.then(update.bind(undefined, parent))
 			.then(cache.bind(undefined, path))
 			.catch(error)
